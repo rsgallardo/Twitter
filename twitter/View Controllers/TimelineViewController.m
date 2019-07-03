@@ -10,7 +10,7 @@
 #import "APIManager.h"
 #import "TweetCell.h"
 #import "Tweet.h"
-//#import "UIImageView+AFNetworking.h" // check if need to import this
+#import "UIImageView+AFNetworking.h"
 
 @interface TimelineViewController () <UITableViewDataSource, UITableViewDelegate>
 
@@ -76,7 +76,7 @@
 //
     TweetCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TweetCell" forIndexPath:indexPath];
     // assign the values for the tweet cell
-    Tweet *tweet = self.tweets[indexPath.row]; //
+    Tweet *tweet = self.tweets[indexPath.row]; // set individual tweet based on index
     cell.name.text = tweet.user.name;
     cell.screenName.text = tweet.user.screenName;
     cell.tweetBody.text = tweet.text;
@@ -84,7 +84,9 @@
     cell.retweets.text = [NSString stringWithFormat:@"%d", tweet.retweetCount];
     cell.favorites.text = [NSString stringWithFormat:@"%d",tweet.favoriteCount];
     
-    
+    NSURL *profileImgURL = [NSURL URLWithString:tweet.user.profileImgURL];
+    cell.profilePicture.image = nil;
+    [cell.profilePicture setImageWithURL:profileImgURL];
     // get image URL
 //    NSString *basedURLString = @"https://image.tmdb.org/t/p/w500";
 //    NSString *posterURLString = movie[@"poster_path"];

@@ -16,8 +16,7 @@
         // initialize the users name and screenName with values from the dictionary
         self.name = dictionary[@"name"]; //
         self.screenName = dictionary[@"screen_name"];
-        // initialize other properties below
-        //...
+        self.profileImgURL = dictionary[@"profile_image_url_https"];
     }
     return self;
 }
