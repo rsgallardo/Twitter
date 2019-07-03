@@ -36,15 +36,14 @@
             for (Tweet *tweet in tweets) {
                 NSString *text = tweet.text;
                 NSLog(@"%@", text);
-//                [self.tableView cellForRowAtIndexPath:];
             }
             [self.tableView reloadData];
 
             //refresh tweets when dragged down
             //not ending because second line not complete
-//            self.refreshControl = [[UIRefreshControl alloc] init];
-//            [self.refreshControl addTarget:self action:@selector(fetchMovies) forControlEvents:UIControlEventValueChanged];
-//            [self.tableView insertSubview:self.refreshControl atIndex:0];
+            self.refreshControl = [[UIRefreshControl alloc] init];
+            [self.refreshControl addTarget:self action:@selector(beginRefresh:) forControlEvents:UIControlEventValueChanged];
+            [self.tableView insertSubview:self.refreshControl atIndex:0];
             
         } else {
             NSLog(@"😫😫😫 Error getting home timeline: %@", error.localizedDescription);
@@ -84,18 +83,10 @@
     cell.retweets.text = [NSString stringWithFormat:@"%d", tweet.retweetCount];
     cell.favorites.text = [NSString stringWithFormat:@"%d",tweet.favoriteCount];
     
+    // set the profile picture on the tweet
     NSURL *profileImgURL = [NSURL URLWithString:tweet.user.profileImgURL];
     cell.profilePicture.image = nil;
     [cell.profilePicture setImageWithURL:profileImgURL];
-    // get image URL
-//    NSString *basedURLString = @"https://image.tmdb.org/t/p/w500";
-//    NSString *posterURLString = movie[@"poster_path"];
-//    NSString *fullPosterURLString = [basedURLString stringByAppendingString:posterURLString];
-
-//    NSURL *posterURL = [NSURL URLWithString:fullPosterURLString];
-//    cell.posterView.image = nil;
-//    [cell.posterView setImageWithURL:posterURL];
-
 
     return cell;
 }
@@ -104,5 +95,24 @@
     return self.tweets.count;
 }
 
+// Makes a network request to get updated data
+// Updates the tableView with the new data
+// Hides the RefreshControl
+- (void)beginRefresh:(UIRefreshControl *)refreshControl {
+    
+    [[APIManager shared] getHomeTimelineWithCompletion:^(NSArray *tweets, NSError *error) {
+        if (tweets) {
+            self.tweets = [[NSMutableArray alloc] initWithArray:tweets];
+            NSLog(@"😎😎😎 Successfully loaded home timeline");
+            for (Tweet *tweet in tweets) {
+                NSString *text = tweet.text;
+                NSLog(@"%@", text);
+            }
+            [self.tableView reloadData];
+            
+            [refreshControl endRefreshing];
+                                                
+        }}];
+}
 
 @end
