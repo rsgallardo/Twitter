@@ -11,10 +11,11 @@
 #import "TweetCell.h"
 #import "Tweet.h"
 #import "UIImageView+AFNetworking.h"
+#import "ComposeViewController.h"
 
-@interface TimelineViewController () <UITableViewDataSource, UITableViewDelegate>
+@interface TimelineViewController () <ComposeViewControllerDelegate, UITableViewDataSource, UITableViewDelegate>
 
-@property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UITableView *tableView; // table view for displaying tweets on timeline
 @property (nonatomic, strong) UIRefreshControl *refreshControl; //for refreshing tweets once they load
 @property (strong, nonatomic) NSMutableArray *tweets;
 
@@ -25,31 +26,40 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    // view controller becomes its dataSource and delegate in viewDidLoad
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
     
     // Get timeline
+    // (4) Make an API request
+    [self getHomeTimelineWithCompletionHelper];
+    
+    //refresh tweets when dragged down
+    //not ending because second line not complete
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    [self.refreshControl addTarget:self action:@selector(beginRefresh:) forControlEvents:UIControlEventValueChanged];
+    [self.tableView insertSubview:self.refreshControl atIndex:0];
+
+}
+
+// Helper method for getting home timeline to prevent reused code
+- (void)getHomeTimelineWithCompletionHelper {
     [[APIManager shared] getHomeTimelineWithCompletion:^(NSArray *tweets, NSError *error) {
         if (tweets) {
+            // (6) View controller stores data passed into completion handler
             self.tweets = [[NSMutableArray alloc] initWithArray:tweets];
             NSLog(@"😎😎😎 Successfully loaded home timeline");
             for (Tweet *tweet in tweets) {
                 NSString *text = tweet.text;
                 NSLog(@"%@", text);
             }
+            // (7) Reload the table view
             [self.tableView reloadData];
 
-            //refresh tweets when dragged down
-            //not ending because second line not complete
-            self.refreshControl = [[UIRefreshControl alloc] init];
-            [self.refreshControl addTarget:self action:@selector(beginRefresh:) forControlEvents:UIControlEventValueChanged];
-            [self.tableView insertSubview:self.refreshControl atIndex:0];
-            
         } else {
             NSLog(@"😫😫😫 Error getting home timeline: %@", error.localizedDescription);
         }
     }];
-
 }
 
 - (void)didReceiveMemoryWarning {
@@ -57,22 +67,26 @@
     // Dispose of any resources that can be recreated.
 }
 
-/*
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
+// How is this setting the TimelineViewController as the delegate of the ComposeViewController
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
+    UINavigationController *navigationController = [segue destinationViewController];
     // Pass the selected object to the new view controller.
+    ComposeViewController *composeController = (ComposeViewController*)navigationController.topViewController;
+    composeController.delegate = self;
 }
-*/
+
 
 
 - (nonnull UITableViewCell *)tableView:(nonnull UITableView *)tableView cellForRowAtIndexPath:(nonnull NSIndexPath *)indexPath {
     
 // Automatically adjust table cell height
 //    self.tableView.rowHeight = UITableViewAutomaticDimension;
-//
+    // Use identifier to set cell
     TweetCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TweetCell" forIndexPath:indexPath];
     // assign the values for the tweet cell
     Tweet *tweet = self.tweets[indexPath.row]; // set individual tweet based on index
@@ -91,6 +105,7 @@
     return cell;
 }
 
+
 - (NSInteger)tableView:(nonnull UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.tweets.count;
 }
@@ -99,20 +114,21 @@
 // Updates the tableView with the new data
 // Hides the RefreshControl
 - (void)beginRefresh:(UIRefreshControl *)refreshControl {
-    
-    [[APIManager shared] getHomeTimelineWithCompletion:^(NSArray *tweets, NSError *error) {
-        if (tweets) {
-            self.tweets = [[NSMutableArray alloc] initWithArray:tweets];
-            NSLog(@"😎😎😎 Successfully loaded home timeline");
-            for (Tweet *tweet in tweets) {
-                NSString *text = tweet.text;
-                NSLog(@"%@", text);
-            }
-            [self.tableView reloadData];
-            
-            [refreshControl endRefreshing];
-                                                
-        }}];
+    // grab instance of APIManager and get timeline
+    [self getHomeTimelineWithCompletionHelper];
+    [refreshControl endRefreshing];
 }
+
+// Button action to compose a tweet
+- (IBAction)compose:(id)sender {
+}
+
+// Add tweet to tweets array and then refreshes the data
+- (void)didTweet:(Tweet *)tweet {
+    [self.tweets addObject:tweet];
+    [self getHomeTimelineWithCompletionHelper];
+//    [self.tableView reloadData];
+}
+
 
 @end

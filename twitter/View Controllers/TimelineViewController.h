@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface TimelineViewController : UIViewController
+- (IBAction)compose:(id)sender;
 
 @end

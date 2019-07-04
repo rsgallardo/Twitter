@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) User *retweetedByUser;  // user who retweeted if tweet is retweet
 //- (instancetype)initWithDictionary:(NSDictionary *) dictionary; // don't think this is necessary but was here in slide (already defined in User.h
 + (NSMutableArray *)tweetsWithArray:(NSArray *)dictionaries; // needs definition here because used in other classes
+- (instancetype)initWithDictionary:(NSDictionary *)dictionary; // make public so can use in composeViewController
 
 @end
 
