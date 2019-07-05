@@ -12,12 +12,15 @@
 #import "Tweet.h"
 #import "UIImageView+AFNetworking.h"
 #import "ComposeViewController.h"
+#import "AppDelegate.h"
+#import "LoginViewController.h"
 
 @interface TimelineViewController () <ComposeViewControllerDelegate, UITableViewDataSource, UITableViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView; // table view for displaying tweets on timeline
 @property (nonatomic, strong) UIRefreshControl *refreshControl; //for refreshing tweets once they load
 @property (strong, nonatomic) NSMutableArray *tweets;
+- (IBAction)didTapLogout:(id)sender;
 
 @end
 
@@ -35,7 +38,6 @@
     [self getHomeTimelineWithCompletionHelper];
     
     //refresh tweets when dragged down
-    //not ending because second line not complete
     self.refreshControl = [[UIRefreshControl alloc] init];
     [self.refreshControl addTarget:self action:@selector(beginRefresh:) forControlEvents:UIControlEventValueChanged];
     [self.tableView insertSubview:self.refreshControl atIndex:0];
@@ -90,13 +92,12 @@
     TweetCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TweetCell" forIndexPath:indexPath];
     // assign the values for the tweet cell
     Tweet *tweet = self.tweets[indexPath.row]; // set individual tweet based on index
+    cell.tweet = tweet;
     cell.name.text = tweet.user.name;
     cell.screenName.text = tweet.user.screenName;
     cell.tweetBody.text = tweet.text;
     cell.date.text = tweet.createdAtString;
-    cell.retweets.text = [NSString stringWithFormat:@"%d", tweet.retweetCount];
-    cell.favorites.text = [NSString stringWithFormat:@"%d",tweet.favoriteCount];
-    
+    [cell refreshRetweetAndFavorite];
     // set the profile picture on the tweet
     NSURL *profileImgURL = [NSURL URLWithString:tweet.user.profileImgURL];
     cell.profilePicture.image = nil;
@@ -123,12 +124,18 @@
 - (IBAction)compose:(id)sender {
 }
 
-// Add tweet to tweets array and then refreshes the data
 - (void)didTweet:(Tweet *)tweet {
     [self.tweets addObject:tweet];
     [self getHomeTimelineWithCompletionHelper];
-//    [self.tableView reloadData];
 }
 
+- (IBAction)didTapLogout:(id)sender {
+    //DOES ALWAYS GETS REMEMBERED... IS THIS SUPPOSED TO HAPPEN
+    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    LoginViewController *loginViewController = [storyboard instantiateViewControllerWithIdentifier:@"LoginViewController"];
+    appDelegate.window.rootViewController = loginViewController;
+    [[APIManager shared] logout]; //clear out access tokens
+}
 
 @end

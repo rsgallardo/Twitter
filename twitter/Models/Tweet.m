@@ -14,7 +14,6 @@
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary {
     self = [super init];
     if (self) {
-        
         //Is this a re-tweet?
         NSDictionary *originalTweet = dictionary[@"retweeted_status"];
         // if the tweet is not an original tweet (a retweet)
@@ -34,7 +33,6 @@
         // Initialize user
         NSDictionary *user = dictionary[@"user"];
         self.user = [[User alloc] initWithDictionary:user];
-        
         // Format createdAt date string
         NSString *createdAtOriginalString = dictionary[@"created_at"];
         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -48,7 +46,6 @@
         // Convert Date to String
         self.createdAtString = [formatter stringFromDate:date];
     }
-    
     return self;
 }
 

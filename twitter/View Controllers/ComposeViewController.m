@@ -39,7 +39,7 @@
 }
 
 - (IBAction)tweet:(id)sender {
-    [[APIManager shared] postStatusWithText:_composeText.text completion:^(Tweet *tweet, NSError *error) {
+    [[APIManager shared] postStatusWithText:self.composeText.text completion:^(Tweet *tweet, NSError *error) {
         if(error){
             NSLog(@"Error composing Tweet: %@", error.localizedDescription);
         }
