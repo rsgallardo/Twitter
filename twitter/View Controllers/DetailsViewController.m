@@ -1,25 +1,45 @@
 //
-//  TweetCell.m
+//  DetailsViewController.m
 //  twitter
 //
-//  Created by rgallardo on 7/1/19.
+//  Created by rgallardo on 7/5/19.
 //  Copyright © 2019 Emerson Malca. All rights reserved.
 //
 
-#import "TweetCell.h"
+#import "DetailsViewController.h"
 #import "APIManager.h"
-#import "TimelineViewController.h"
-#import "Tweet.h"
+#import "UIImageView+AFNetworking.h"
+#import "TweetCell.h"
 
-@implementation TweetCell
 
-- (void)awakeFromNib {
-    [super awakeFromNib];
+@interface DetailsViewController ()
+
+@end
+
+@implementation DetailsViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.name.text = self.tweet.user.name;
+    self.screenName.text = self.tweet.user.screenName;
+    self.date.text = self.tweet.createdAtString;
+    self.tweetBody.text = self.tweet.text;
+    [self refreshRetweetAndFavorite];
+    NSURL *profileImgURL = [NSURL URLWithString:self.tweet.user.profileImgURL];
+    self.profileImg.image = nil;
+    [self.profileImg setImageWithURL:profileImgURL];
 }
 
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-    [super setSelected:selected animated:animated];
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
 }
+*/
 
 - (IBAction)didTapRetweet:(id)sender {
     if (self.tweet.retweeted) {
@@ -59,21 +79,6 @@
 }
 
 - (IBAction)didTapFavorite:(id)sender {
-    [self favoriteHelper];
-//    if (self.tweet.favorited) {
-//        self.tweet.favorited = NO;
-//        self.tweet.favoriteCount -= 1;
-//        [self refreshRetweetAndFavorite];
-//        [self sendUnfavoriteRequest];
-//    } else {
-//        self.tweet.favorited = YES;
-//        self.tweet.favoriteCount += 1;
-//        [self refreshRetweetAndFavorite];
-//        [self sendFavoriteRequest];
-//    }
-}
-
-- (void)favoriteHelper {
     if (self.tweet.favorited) {
         self.tweet.favorited = NO;
         self.tweet.favoriteCount -= 1;

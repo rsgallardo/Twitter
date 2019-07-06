@@ -12,6 +12,7 @@
 #import "Tweet.h"
 #import "UIImageView+AFNetworking.h"
 #import "ComposeViewController.h"
+#import "DetailsViewController.h"
 #import "AppDelegate.h"
 #import "LoginViewController.h"
 
@@ -41,6 +42,7 @@
     self.refreshControl = [[UIRefreshControl alloc] init];
     [self.refreshControl addTarget:self action:@selector(beginRefresh:) forControlEvents:UIControlEventValueChanged];
     [self.tableView insertSubview:self.refreshControl atIndex:0];
+    
 
 }
 
@@ -75,17 +77,24 @@
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 // How is this setting the TimelineViewController as the delegate of the ComposeViewController
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
     UINavigationController *navigationController = [segue destinationViewController];
-    // Pass the selected object to the new view controller.
-    ComposeViewController *composeController = (ComposeViewController*)navigationController.topViewController;
-    composeController.delegate = self;
+    if ([segue.identifier isEqualToString:@"composeSegue"]) {
+        // Pass the selected object to the new view controller.
+        ComposeViewController *composeController = (ComposeViewController*)navigationController.topViewController;
+        composeController.delegate = self;
+    } else if ([segue.identifier isEqualToString:@"detailsSegue"]) {
+        UITableViewCell *tappedCell = sender;
+        DetailsViewController *detailsViewController = [segue destinationViewController];
+        NSIndexPath *indexPath = [self.tableView indexPathForCell:tappedCell];
+        Tweet *tweet = self.tweets[indexPath.row];
+        detailsViewController.tweet = tweet;
+    } else {
+        
+    }
 }
 
 
-
 - (nonnull UITableViewCell *)tableView:(nonnull UITableView *)tableView cellForRowAtIndexPath:(nonnull NSIndexPath *)indexPath {
-    
 // Automatically adjust table cell height
 //    self.tableView.rowHeight = UITableViewAutomaticDimension;
     // Use identifier to set cell
@@ -102,7 +111,6 @@
     NSURL *profileImgURL = [NSURL URLWithString:tweet.user.profileImgURL];
     cell.profilePicture.image = nil;
     [cell.profilePicture setImageWithURL:profileImgURL];
-
     return cell;
 }
 
